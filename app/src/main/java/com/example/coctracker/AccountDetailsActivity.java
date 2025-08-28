@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -18,18 +17,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-import com.example.coctracker.adapter.TimerAdapter;
+import com.example.coctracker.adapter.UpgradeListAdapter;
 import com.example.coctracker.database.AppDatabase;
 import com.example.coctracker.database.DatabaseClient;
 import com.example.coctracker.models.Account;
 import com.example.coctracker.models.Timer;
+import com.example.coctracker.models.display.HeaderItem;
+import com.example.coctracker.models.display.ListItem;
+import com.example.coctracker.models.display.TimerItem;
 import com.example.coctracker.util.JsonParser;
 import com.example.coctracker.util.ParsedDataWrapper;
 import com.example.coctracker.workers.TimerWorker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class AccountDetailsActivity extends AppCompatActivity {
@@ -38,17 +39,9 @@ public class AccountDetailsActivity extends AppCompatActivity {
     private long accountId;
     private String accountName;
 
-    // UI Components
-    private TextView homeBaseTitle, homeBuildingsTitle, homeHeroesTitle, homeLabTitle;
-    private TextView builderBaseTitle, builderBuildingsTitle, builderHeroesTitle, builderLabTitle;
-    private RecyclerView homeBuildingsRecyclerView, homeHeroesRecyclerView, homeLabRecyclerView;
-    private RecyclerView builderBuildingsRecyclerView, builderHeroesRecyclerView, builderLabRecyclerView;
-
-    // Data Lists and Adapters
-    private List<Timer> homeBuildingTimers, homeHeroTimers, homeLabTimers;
-    private List<Timer> builderBuildingTimers, builderHeroTimers, builderLabTimers;
-    private TimerAdapter homeBuildingAdapter, homeHeroAdapter, homeLabAdapter;
-    private TimerAdapter builderBuildingAdapter, builderHeroAdapter, builderLabAdapter;
+    private RecyclerView mainRecyclerView;
+    private UpgradeListAdapter adapter;
+    private List<ListItem> displayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,70 +54,19 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(accountName);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // This enables the back arrow
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        initializeViews();
-        initializeListsAndAdapters();
-        setupRecyclerViews();
-
-        FloatingActionButton fab = findViewById(R.id.addTimerFromJsonFab);
-        fab.setOnClickListener(view -> pasteAndShowConfirmation());
-    }
-
-    private void initializeViews() {
         TextView accountNameTextView = findViewById(R.id.accountNameTextView);
         accountNameTextView.setText(accountName);
 
-        homeBaseTitle = findViewById(R.id.homeBaseTitle);
-        homeBuildingsTitle = findViewById(R.id.homeBuildingsTitle);
-        homeHeroesTitle = findViewById(R.id.homeHeroesTitle);
-        homeLabTitle = findViewById(R.id.homeLabTitle);
+        mainRecyclerView = findViewById(R.id.mainRecyclerView);
+        mainRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new UpgradeListAdapter(this, displayList);
+        mainRecyclerView.setAdapter(adapter);
 
-        builderBaseTitle = findViewById(R.id.builderBaseTitle);
-        builderBuildingsTitle = findViewById(R.id.builderBuildingsTitle);
-        builderHeroesTitle = findViewById(R.id.builderHeroesTitle);
-        builderLabTitle = findViewById(R.id.builderLabTitle);
-
-        homeBuildingsRecyclerView = findViewById(R.id.homeBuildingsRecyclerView);
-        homeHeroesRecyclerView = findViewById(R.id.homeHeroesRecyclerView);
-        homeLabRecyclerView = findViewById(R.id.homeLabRecyclerView);
-
-        builderBuildingsRecyclerView = findViewById(R.id.builderBuildingsRecyclerView);
-        builderHeroesRecyclerView = findViewById(R.id.builderHeroesRecyclerView);
-        builderLabRecyclerView = findViewById(R.id.builderLabRecyclerView);
-    }
-
-    private void initializeListsAndAdapters() {
-        homeBuildingTimers = new ArrayList<>();
-        homeHeroTimers = new ArrayList<>();
-        homeLabTimers = new ArrayList<>();
-        homeBuildingAdapter = new TimerAdapter(this, homeBuildingTimers);
-        homeHeroAdapter = new TimerAdapter(this, homeHeroTimers);
-        homeLabAdapter = new TimerAdapter(this, homeLabTimers);
-
-        builderBuildingTimers = new ArrayList<>();
-        builderHeroTimers = new ArrayList<>();
-        builderLabTimers = new ArrayList<>();
-        builderBuildingAdapter = new TimerAdapter(this, builderBuildingTimers);
-        builderHeroAdapter = new TimerAdapter(this, builderHeroTimers);
-        builderLabAdapter = new TimerAdapter(this, builderLabTimers);
-    }
-
-    private void setupRecyclerViews() {
-        homeBuildingsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        homeBuildingsRecyclerView.setAdapter(homeBuildingAdapter);
-        homeHeroesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        homeHeroesRecyclerView.setAdapter(homeHeroAdapter);
-        homeLabRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        homeLabRecyclerView.setAdapter(homeLabAdapter);
-
-        builderBuildingsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        builderBuildingsRecyclerView.setAdapter(builderBuildingAdapter);
-        builderHeroesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        builderHeroesRecyclerView.setAdapter(builderHeroAdapter);
-        builderLabRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        builderLabRecyclerView.setAdapter(builderLabAdapter);
+        FloatingActionButton fab = findViewById(R.id.addTimerFromJsonFab);
+        fab.setOnClickListener(view -> pasteAndShowConfirmation());
     }
 
     private void pasteAndShowConfirmation() {
@@ -189,61 +131,47 @@ public class AccountDetailsActivity extends AppCompatActivity {
     }
 
     public void refreshTimerList() {
-        homeBuildingTimers.clear();
-        homeHeroTimers.clear();
-        homeLabTimers.clear();
-        builderBuildingTimers.clear();
-        builderHeroTimers.clear();
-        builderLabTimers.clear();
+        displayList.clear();
 
         List<Timer> allTimers = db.timerDao().getTimersForAccount(accountId);
+
+        // Temporary lists to hold sorted timers
+        List<Timer> homeBuilding = new ArrayList<>(), homeHero = new ArrayList<>(), homeLab = new ArrayList<>();
+        List<Timer> builderBuilding = new ArrayList<>(), builderHero = new ArrayList<>(), builderLab = new ArrayList<>();
+
+        // Sort all timers into their respective categories
         for (Timer timer : allTimers) {
+            String category = timer.category;
+            if (category == null) category = "Buildings";
+
             if (timer.isBuilderBase) {
-                switch (Objects.requireNonNull(timer.category)) {
-                    case "Buildings": builderBuildingTimers.add(timer); break;
-                    case "Heroes": builderHeroTimers.add(timer); break;
-                    case "Laboratory": builderLabTimers.add(timer); break;
-                }
+                if ("Heroes".equals(category)) builderHero.add(timer);
+                else if ("Laboratory".equals(category)) builderLab.add(timer);
+                else builderBuilding.add(timer);
             } else {
-                switch (Objects.requireNonNull(timer.category)) {
-                    case "Buildings": homeBuildingTimers.add(timer); break;
-                    case "Heroes": homeHeroTimers.add(timer); break;
-                    case "Laboratory": homeLabTimers.add(timer); break;
-                }
+                if ("Heroes".equals(category)) homeHero.add(timer);
+                else if ("Laboratory".equals(category)) homeLab.add(timer);
+                else homeBuilding.add(timer);
             }
         }
 
-        homeBuildingAdapter.notifyDataSetChanged();
-        homeHeroAdapter.notifyDataSetChanged();
-        homeLabAdapter.notifyDataSetChanged();
-        builderBuildingAdapter.notifyDataSetChanged();
-        builderHeroAdapter.notifyDataSetChanged();
-        builderLabAdapter.notifyDataSetChanged();
+        // Build the final display list
+        addSectionToList("Town Hall - Buildings", homeBuilding);
+        addSectionToList("Town Hall - Heroes", homeHero);
+        addSectionToList("Town Hall - Laboratory", homeLab);
+        addSectionToList("Builder Hall - Buildings", builderBuilding);
+        addSectionToList("Builder Hall - Heroes", builderHero);
+        addSectionToList("Builder Hall - Laboratory", builderLab);
 
-        updateSectionVisibility();
+        adapter.notifyDataSetChanged();
     }
 
-    private void updateSectionVisibility() {
-        boolean isHomeBaseVisible = !homeBuildingTimers.isEmpty() || !homeHeroTimers.isEmpty() || !homeLabTimers.isEmpty();
-        homeBaseTitle.setVisibility(isHomeBaseVisible ? View.VISIBLE : View.GONE);
-        updateCategoryVisibility(homeBuildingTimers, homeBuildingsTitle, homeBuildingsRecyclerView);
-        updateCategoryVisibility(homeHeroTimers, homeHeroesTitle, homeHeroesRecyclerView);
-        updateCategoryVisibility(homeLabTimers, homeLabTitle, homeLabRecyclerView);
-
-        boolean isBuilderBaseVisible = !builderBuildingTimers.isEmpty() || !builderHeroTimers.isEmpty() || !builderLabTimers.isEmpty();
-        builderBaseTitle.setVisibility(isBuilderBaseVisible ? View.VISIBLE : View.GONE);
-        updateCategoryVisibility(builderBuildingTimers, builderBuildingsTitle, builderBuildingsRecyclerView);
-        updateCategoryVisibility(builderHeroTimers, builderHeroesTitle, builderHeroesRecyclerView);
-        updateCategoryVisibility(builderLabTimers, builderLabTitle, builderLabRecyclerView);
-    }
-
-    private void updateCategoryVisibility(List<Timer> list, View title, View recyclerView) {
-        if (list.isEmpty()) {
-            title.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.GONE);
-        } else {
-            title.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.VISIBLE);
+    private void addSectionToList(String title, List<Timer> timers) {
+        if (!timers.isEmpty()) {
+            displayList.add(new HeaderItem(title));
+            for (Timer timer : timers) {
+                displayList.add(new TimerItem(timer));
+            }
         }
     }
 
@@ -255,7 +183,6 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Handle history button click
         if (item.getItemId() == R.id.action_history) {
             Intent intent = new Intent(this, HistoryActivity.class);
             intent.putExtra("ACCOUNT_ID", accountId);
@@ -263,7 +190,6 @@ public class AccountDetailsActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
-        // Handle back arrow click
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
@@ -291,5 +217,14 @@ public class AccountDetailsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshTimerList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Stop the handler to prevent memory leaks
+        if (adapter != null) {
+            adapter.stopUpdatingTimers();
+        }
     }
 }

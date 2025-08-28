@@ -18,101 +18,12 @@
         android:textStyle="bold"
         tools:text="My Main Account" />
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mainRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/accountNameTextView">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
-
-            <!-- Home Base Section -->
-            <TextView
-                android:id="@+id/homeBaseTitle"
-                style="@style/BaseTitle"
-                android:text="Home Base"
-                android:visibility="gone" />
-
-            <!-- Home Buildings -->
-            <TextView
-                android:id="@+id/homeBuildingsTitle"
-                style="@style/CategoryTitle"
-                android:text="Buildings"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/homeBuildingsRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-            <!-- Home Heroes -->
-            <TextView
-                android:id="@+id/homeHeroesTitle"
-                style="@style/CategoryTitle"
-                android:text="Heroes"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/homeHeroesRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-            <!-- Home Laboratory -->
-            <TextView
-                android:id="@+id/homeLabTitle"
-                style="@style/CategoryTitle"
-                android:text="Laboratory"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/homeLabRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-
-            <!-- Builder Base Section -->
-            <TextView
-                android:id="@+id/builderBaseTitle"
-                style="@style/BaseTitle"
-                android:layout_marginTop="24dp"
-                android:text="Builder Base"
-                android:visibility="gone" />
-
-            <!-- Builder Buildings -->
-            <TextView
-                android:id="@+id/builderBuildingsTitle"
-                style="@style/CategoryTitle"
-                android:text="Buildings"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/builderBuildingsRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-            <!-- Builder Heroes -->
-            <TextView
-                android:id="@+id/builderHeroesTitle"
-                style="@style/CategoryTitle"
-                android:text="Heroes"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/builderHeroesRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-            <!-- Builder Laboratory -->
-            <TextView
-                android:id="@+id/builderLabTitle"
-                style="@style/CategoryTitle"
-                android:text="Laboratory"
-                android:visibility="gone" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/builderLabRecyclerView"
-                style="@style/CategoryRecyclerView"
-                android:visibility="gone" />
-
-        </LinearLayout>
-    </ScrollView>
+        android:layout_below="@id/accountNameTextView"
+        android:padding="8dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTimerFromJsonFab"
@@ -126,3 +37,4 @@
         app:tint="@android:color/white" />
 
 </RelativeLayout>
+    

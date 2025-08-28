@@ -45,7 +45,12 @@ public class JsonParser {
         NAME_MAP.put("1000010_false", "Wall");
         NAME_MAP.put("1000014_false", "Clan Castle");
         NAME_MAP.put("1000020_false", "Spell Factory");
+        NAME_MAP.put("1000021_false", "X-Bow");
         NAME_MAP.put("1000024_false", "Dark Elixir Storage");
+        NAME_MAP.put("1000028_false", "Air Sweeper");
+        NAME_MAP.put("1000029_false", "Dark Spell Factory");
+        NAME_MAP.put("1000031_false", "Eagle Artillery");
+        NAME_MAP.put("1000068_false", "Pet House");
         NAME_MAP.put("1000070_false", "Blacksmith");
         NAME_MAP.put("1000071_false", "Hero Hall");
         NAME_MAP.put("1000072_false", "Spell Tower");
@@ -149,7 +154,7 @@ public class JsonParser {
             String name = NAME_MAP.get(uniqueKey);
             return name + " to Lvl " + level;
         } else {
-            String baseType = isBuilderBase ? "Builder Base" : "Home Base";
+            String baseType = isBuilderBase ? "Builder Hall" : "Town Hall";
             return baseType + " Upgrade (ID: " + dataId + ")";
         }
     }
